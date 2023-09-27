@@ -10,6 +10,7 @@ public class Cell : MonoBehaviour
 
     private Vector2Int _coordinates;
     private int _value = 0;
+
     private Color _currentColor;
 
     [SerializeField] private Image _image;
@@ -23,11 +24,11 @@ public class Cell : MonoBehaviour
     {
         _coordinates = coordinates;
 
-        if(value < MAX_VALUE)
+        if (value < MAX_VALUE)
             _value = value;
         else
             _value = 0;
-
+     
         _currentColor = color;
 
         UpdateValue();

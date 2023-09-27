@@ -10,5 +10,6 @@ public class GameplaySceneInstaller : MonoInstaller
     public override void InstallBindings()
     {
         Container.Bind<ColorsManager>().FromInstance(_colorsManager).AsSingle();
+        Container.Bind<IInput>().To<DesktopInput>().AsSingle();
     }
 }
