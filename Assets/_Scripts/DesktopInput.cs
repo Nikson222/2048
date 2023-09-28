@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class DesktopInput : IInput
+public class DesktopInput : InputHandler
 {
-    public event Action<Vector2> OnMove;
-
-    public void Update()
+    public Vector2 GetMoveDirection()
     {
         float horizontalInput = Input.GetAxis("Horizontal");
         float verticalInput = Input.GetAxis("Vertical");
@@ -16,6 +12,6 @@ public class DesktopInput : IInput
 
         inputVector.Normalize();
 
-        OnMove?.Invoke(inputVector);
+        return inputVector;
     }
 }

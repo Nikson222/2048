@@ -6,49 +6,36 @@ using UnityEngine.UI;
 [RequireComponent(typeof(RectTransform))]
 public class Cell : MonoBehaviour
 {
-    public static int MAX_VALUE = 12;
+    public Cell _rightCell;
+    public Cell _downCell;
+    public Cell _leftCell;
+    public Cell _upperCell;
+    public CellContent _content;
 
     private Vector2Int _coordinates;
-    private int _value = 0;
 
-    private Color _currentColor;
-
-    [SerializeField] private Image _image;
-    [SerializeField] private Text _text;
-
+    public bool IsEmpty => _content == null;
     public Vector2Int Coordinates => _coordinates;
-    public int Points => IsEmpty ? 0 : (int)Mathf.Pow(2, _value);
-    public bool IsEmpty => _value == 0;
-
-    public void SetValue(Vector2Int coordinates, int value, Color color)
+    
+    public void Init(Cell rightCell, Cell downCell, Cell leftCell, Cell upperCell)
     {
-        _coordinates = coordinates;
-
-        if (value < MAX_VALUE)
-            _value = value;
-        else
-            _value = 0;
-     
-        _currentColor = color;
-
-        UpdateValue();
+        _rightCell = rightCell;
+        _downCell = downCell;
+        _leftCell = leftCell;
+        _upperCell = upperCell;
     }
 
-    public void SetValue(int value, Color color)
+    public void SetContent(CellContent cellContent)
     {
-        if (value < MAX_VALUE)
-            _value = value;
-        else
-            _value = 0;
-
-        _currentColor = color;
-
-        UpdateValue();
+        _content = cellContent;
+        _content.transform.SetParent(transform, false);
+        _content.transform.localPosition = Vector3.zero;
     }
 
-    private void UpdateValue()
+    public void ClearContent()
     {
-        _text.text = IsEmpty ? "" : Points.ToString();
-        _image.color = _currentColor;
+        _content.transform.SetParent(null);
+        _content.gameObject.SetActive(false);
+        _content = null;
     }
 }

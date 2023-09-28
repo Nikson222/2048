@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface IInput
+public interface InputHandler
 {
-    event Action<Vector2> OnMove;
+    Vector2 GetMoveDirection();
 }

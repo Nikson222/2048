@@ -10,22 +10,25 @@ public class Field : MonoBehaviour
     private const int INIT_VALUE_CELL = 0;
     private const int START_VALUE_CELL = 1;
 
-    [SerializeField] private Cell _cellPrefab;
     private RectTransform _cellRectTransform;
     [SerializeField] private float _cellSpacing;
 
+    [SerializeField] private Cell _cellPrefab;
     [SerializeField] private int _minStarterCellsCount;
     [SerializeField] private int _maxStarterCellsCount;
 
     private RectTransform _fieldRectTransform;
     private Cell[,] _cells = new Cell[FIELD_SIZE, FIELD_SIZE];
 
-    private ColorsManager _colorsManager;
+    private CellContentManager _contentManager;
+
+    public float CellSpasing => _cellSpacing;
+
 
     [Inject]
-    public void Constructor(ColorsManager colorsManager)
+    public void Constructor(CellContentManager cellContentManager)
     {
-        _colorsManager = colorsManager;
+        _contentManager = cellContentManager;
     }
 
     public void Awake()
@@ -38,23 +41,21 @@ public class Field : MonoBehaviour
     {
         CalculateFieldSize();
         CreateCells();
-        CreateCellsWithStartValue();
+        FillStarterCells();
     }
 
     public void RestartField()
     {
         ClearField();
-        CreateCellsWithStartValue();
+        FillStarterCells();
     }
 
-    private void ClearField()
+    private void CalculateFieldSize()
     {
-        foreach (var cell in _cells)
-        {
-            InitCell(cell, cell.Coordinates);
-        }
-    }
+        float sizeOfField = FIELD_SIZE * (_cellRectTransform.rect.width + _cellSpacing) + _cellSpacing;
 
+        _fieldRectTransform.sizeDelta = new Vector2(sizeOfField, sizeOfField);
+    }
 
     private void CreateCells()
     {
@@ -69,35 +70,43 @@ public class Field : MonoBehaviour
                 CalculateInitCellPosition(cell, startCellPosition, new Vector2Int(x, y));
 
                 _cells[x, y] = cell;
-
-                InitCell(cell, new Vector2Int(x, y));
             }
+        }
+
+        InitCells();
+    }
+
+    private void ClearField()
+    {
+        foreach (var cell in _cells)
+        {
+            if(!cell.IsEmpty)
+                cell.ClearContent();
         }
     }
 
-    private void CreateCellsWithStartValue()
+    private void FillStarterCells()
     {
-        int countCells = Random.Range(_minStarterCellsCount, _maxStarterCellsCount+1);
+        int countCells = Random.Range(_minStarterCellsCount, _maxStarterCellsCount + 1);
 
-        Color colorByValue = _colorsManager.GetColorByValue(START_VALUE_CELL);
+        Vector2Int lastCoordinates = Vector2Int.zero;
 
         for (int i = 0; i < countCells; i++)
         {
             int xCoordinate = Random.Range(0, FIELD_SIZE);
             int yCoordinate = Random.Range(0, FIELD_SIZE);
 
-            if (_cells[xCoordinate, yCoordinate].IsEmpty)
-                _cells[xCoordinate, yCoordinate].SetValue(START_VALUE_CELL, colorByValue);
-            else
-                i--;
+            if (new Vector2Int(xCoordinate, yCoordinate) != lastCoordinates)
+            {
+                if (_cells[xCoordinate, yCoordinate].IsEmpty)
+                {
+                    CellContent cellContent = _contentManager.GetContent(INIT_VALUE_CELL);
+                    _cells[xCoordinate, yCoordinate].SetContent(cellContent);
+                }
+            }
+
+            lastCoordinates = new Vector2Int(xCoordinate, yCoordinate);
         }
-    }
-
-    private void CalculateFieldSize()
-    {
-        float sizeOfField = FIELD_SIZE * (_cellRectTransform.rect.width + _cellSpacing) + _cellSpacing;
-
-        _fieldRectTransform.sizeDelta = new Vector2(sizeOfField, sizeOfField);
     }
 
     private Vector2 CalculateStartCellPosition()
@@ -108,6 +117,14 @@ public class Field : MonoBehaviour
         return new Vector2(startPositionX, startPositionY);
     }
 
+    private void CalculateInitCellPosition(Cell cell, Vector2 startPosition, Vector2Int coordinates)
+    {
+        Vector2 newPosition = new Vector2(startPosition.x + (coordinates.x * (_cellRectTransform.rect.width + _cellSpacing)),
+            startPosition.y - (coordinates.y * (_cellRectTransform.rect.height + _cellSpacing)));
+
+        cell.transform.localPosition = newPosition;
+    }
+
     private Cell InstantiateCell()
     {
         Cell cell = Instantiate(_cellPrefab, transform, false);
@@ -116,18 +133,21 @@ public class Field : MonoBehaviour
         return cell;
     }
 
-    private void InitCell(Cell cell, Vector2Int coordinates)
+    private void InitCells()
     {
-        Color initcolor = _colorsManager.GetColorByValue(INIT_VALUE_CELL);
+        for (int x = 0; x < FIELD_SIZE; x++)
+        {
+            for (int y = 0; y < FIELD_SIZE; y++)
+            {
+                Cell currentCell = _cells[x, y];
 
-        cell.SetValue(coordinates, INIT_VALUE_CELL, initcolor);
-    }
-    
-    private void CalculateInitCellPosition(Cell cell, Vector2 startPosition, Vector2Int coordinates)
-    {
-        Vector2 newPosition = new Vector2(startPosition.x + (coordinates.x * (_cellRectTransform.rect.width + _cellSpacing)), 
-            startPosition.y - (coordinates.y * (_cellRectTransform.rect.height + _cellSpacing)));
+                Cell rightCell = (x < FIELD_SIZE - 1) ? _cells[x + 1, y] : null;
+                Cell downCell = (y < FIELD_SIZE - 1) ? _cells[x, y + 1] : null;
+                Cell leftCell = (x > 0) ? _cells[x - 1, y] : null;
+                Cell upperCell = (y > 0) ? _cells[x, y - 1] : null;
 
-        cell.transform.localPosition = newPosition;
+                currentCell.Init(rightCell, downCell, leftCell, upperCell);
+            }
+        }
     }
 }
