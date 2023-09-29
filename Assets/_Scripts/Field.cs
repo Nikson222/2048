@@ -7,7 +7,6 @@ using Zenject;
 public class Field : MonoBehaviour
 {
     private const int FIELD_SIZE = 3;
-    private const int INIT_VALUE_CELL = 0;
     private const int START_VALUE_CELL = 1;
 
     private RectTransform _cellRectTransform;
@@ -22,8 +21,8 @@ public class Field : MonoBehaviour
 
     private CellContentManager _contentManager;
 
-    public float CellSpasing => _cellSpacing;
-
+    public int FieldSize => FIELD_SIZE;
+    public Cell[,] Cells => _cells;
 
     [Inject]
     public void Constructor(CellContentManager cellContentManager)
@@ -81,7 +80,7 @@ public class Field : MonoBehaviour
         foreach (var cell in _cells)
         {
             if(!cell.IsEmpty)
-                cell.ClearContent();
+                cell.DeleteContent();
         }
     }
 
@@ -100,10 +99,12 @@ public class Field : MonoBehaviour
             {
                 if (_cells[xCoordinate, yCoordinate].IsEmpty)
                 {
-                    CellContent cellContent = _contentManager.GetContent(INIT_VALUE_CELL);
+                    CellContent cellContent = _contentManager.GetContent(START_VALUE_CELL);
                     _cells[xCoordinate, yCoordinate].SetContent(cellContent);
                 }
             }
+            else
+                i--;
 
             lastCoordinates = new Vector2Int(xCoordinate, yCoordinate);
         }
@@ -147,7 +148,22 @@ public class Field : MonoBehaviour
                 Cell upperCell = (y > 0) ? _cells[x, y - 1] : null;
 
                 currentCell.Init(rightCell, downCell, leftCell, upperCell);
+                currentCell.OnMerge += _contentManager.UpdateContent;
             }
         }
+    }
+
+    public void CreateNewContentInRandomCell()
+    {
+        List<Cell> emptyCells = new List<Cell>();
+        foreach (var cell in _cells)
+        {
+            if(cell.IsEmpty)
+                emptyCells.Add(cell);
+        }
+
+        int randomIndex = Random.Range(0, emptyCells.Count);
+
+        emptyCells[randomIndex].SetContent(_contentManager.GetContent(START_VALUE_CELL));
     }
 }

@@ -13,6 +13,7 @@ public class CellContent : MonoBehaviour
     [SerializeField] private Image _image;
     [SerializeField] private Text _text;
 
+    public int Value => _value;
     public int Points => (int)Mathf.Pow(2, _value);
 
     public void SetValue(int value, Color color)
