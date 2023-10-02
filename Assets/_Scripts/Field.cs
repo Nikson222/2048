@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
@@ -11,21 +10,23 @@ public class Field : MonoBehaviour
     private const int START_VALUE_CELL = 1;
 
     private RectTransform _cellRectTransform;
+    private RectTransform _fieldRectTransform;
     [SerializeField] private float _cellSpacing;
 
     [SerializeField] private Cell _cellPrefab;
+
     [SerializeField] private int _minStarterCellsCount;
     [SerializeField] private int _maxStarterCellsCount;
 
-    private RectTransform _fieldRectTransform;
     private Cell[,] _cells = new Cell[FIELD_SIZE, FIELD_SIZE];
 
     private CellContentManager _contentManager;
 
+    public event Action OnRestartField;
+
     public int FieldSize => FIELD_SIZE;
     public Cell[,] Cells => _cells;
 
-    public event Action OnRestartField;
 
     [Inject]
     public void Constructor(CellContentManager cellContentManager)
@@ -48,8 +49,10 @@ public class Field : MonoBehaviour
 
     public void RestartField()
     {
-        restartField();
+        ClearField();
         FillStarterCells();
+
+        OnRestartField?.Invoke();
     }
 
     private void CalculateFieldSize()
@@ -78,16 +81,6 @@ public class Field : MonoBehaviour
         InitCells();
     }
 
-    private void restartField()
-    {
-        foreach (var cell in _cells)
-        {
-            if (!cell.IsEmpty)
-                cell.DeleteContent();
-        }
-
-        OnRestartField?.Invoke();
-    }
 
     private void FillStarterCells()
     {
@@ -112,6 +105,15 @@ public class Field : MonoBehaviour
                 i--;
 
             lastCoordinates = new Vector2Int(xCoordinate, yCoordinate);
+        }
+    }
+
+    private void ClearField()
+    {
+        foreach (var cell in _cells)
+        {
+            if (!cell.IsEmpty)
+                cell.DeleteContent();
         }
     }
 

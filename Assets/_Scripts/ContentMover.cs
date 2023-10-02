@@ -4,14 +4,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
-using Zenject.Asteroids;
 
 public class ContentMover : MonoBehaviour
 {
     private IInputHandler _inputHandler;
+
     private Field _field;
+
     public event Action OnMove;
     public event Action OnNoOpportunityMove;
+
     private bool IsMovingProcess = false;
 
     [Inject]
@@ -48,7 +50,6 @@ public class ContentMover : MonoBehaviour
 
         while (IsMovingProcess)
         {
-
             List<Cell> cellsWhichMoving = new List<Cell>();
 
             foreach (var cell in cells)

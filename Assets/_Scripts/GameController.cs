@@ -1,18 +1,13 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using Zenject;
+﻿using Zenject;
 
 public class GameController
 {
-    private ContentMover _contentMover;
     private GameOverScreen _gameOverScreen;
     private Field _field;
 
     [Inject]
     public void Constructor(ContentMover contentMover, GameOverScreen gameOverScreen, Field field)
     {
-        _contentMover = contentMover;
         _gameOverScreen = gameOverScreen;
         _field = field;
     }
