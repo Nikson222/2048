@@ -40,13 +40,13 @@ public class ContentPooler : MonoBehaviour
             return content;
         }
 
-        CellContent newContent = SpawnInsufficientEnemies(_cellContentPrefab);
+        CellContent newContent = SpawnInsufficientContent(_cellContentPrefab);
         newContent.gameObject.SetActive(true);
         newContent.transform.localScale = Vector3.one;
         return newContent;
     }
 
-    private CellContent SpawnInsufficientEnemies(CellContent cellContentPrefab)
+    private CellContent SpawnInsufficientContent(CellContent cellContentPrefab)
     {
         CellContent spawnedContent = null;
 

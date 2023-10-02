@@ -13,8 +13,8 @@ TagManager:
   - UI
   - 
   - 
-  - 
-  - 
+  - Cell
+  - Content
   - 
   - 
   - 
@@ -40,4 +40,10 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Content
+    uniqueID: 2978065511
+    locked: 0
+  - name: Cell
+    uniqueID: 1342790633
     locked: 0

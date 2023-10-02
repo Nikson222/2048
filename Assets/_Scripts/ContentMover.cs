@@ -30,76 +30,66 @@ public class ContentMover : MonoBehaviour
     {
         IsMovingProcess = true;
 
-        List<Cell> cellsWhichMoving = new List<Cell>();
+        List<Cell> cells = new List<Cell>();
+
+        if (swipeDirection == SwipeDirection.Down || swipeDirection == SwipeDirection.Right)
+            cells = GetInvertedListCells();
+        else
+            cells = GetNormalListCells();
+
+        while (IsMovingProcess)
+        {
+            List<Cell> cellsWhichMoving = new List<Cell>();
+
+            foreach (var cell in cells)
+            {
+                if (!cell.IsEmpty)
+                {
+                    if (cell.IsCanMoveToDirection(swipeDirection) && !cell.IsMoving)
+                    {
+                        cell.StartMoveContentByDirection(swipeDirection);
+                        cellsWhichMoving.Add(cell);
+                    }
+                }
+            }
+
+            if (cellsWhichMoving.Count > 0)
+            {
+                yield return new WaitWhile(() => cellsWhichMoving.Any(cell => cell.IsMoving));
+
+            }
+            else
+            {
+                IsMovingProcess = false;
+                OnMove?.Invoke();
+            }
+        }
+    }
+
+    private List<Cell> GetNormalListCells()
+    {
+        List<Cell> normalList = new List<Cell>();
 
         foreach (var cell in _field.Cells)
         {
-            if (!cell.IsEmpty)
+            normalList.Add(cell);
+        }
+
+        return normalList;
+    }
+
+    private List<Cell> GetInvertedListCells()
+    {
+        List<Cell> invertedList = new List<Cell>();
+
+        for (int x = _field.FieldSize-1; x > -1; x--)
+        {
+            for (int y = _field.FieldSize-1; y > -1; y--)
             {
-                if (cell.IsCanMoveToDirection(swipeDirection) && !cell.IsMoving)
-                {
-                    cell.StartMoveContentByDirection(swipeDirection);
-                    cellsWhichMoving.Add(cell);
-                }
+                invertedList.Add(_field.Cells[x, y]);
             }
         }
 
-        // Дождитесь, пока все ячейки завершат движение
-        yield return new WaitWhile(() => cellsWhichMoving.Any(cell => cell.IsMoving));
-
-        OnMove?.Invoke();
-        IsMovingProcess = false;
-        //IsMovingProcess = true;
-
-        //bool anyoneCellCanMove = true;
-
-        //while (anyoneCellCanMove)
-        //{
-        //    List<Cell> cellsWhichMoving = new List<Cell>();
-
-        //    foreach (var cell in _field.Cells)
-        //    {
-        //        if (!cell.IsEmpty)
-        //        {
-        //            if (cell.IsCanMoveToDirection(swipeDirection) && !cell.IsMoving)
-        //            {
-        //                cell.StartMoveContentByDirection(swipeDirection);
-        //                cellsWhichMoving.Add(cell);
-        //                print(cell);
-        //            }
-
-        //            yield return null;
-        //        }
-        //    }
-
-        //    if (cellsWhichMoving.Count < 1)
-        //    {
-        //        anyoneCellCanMove = false;
-        //        break;
-        //    }
-
-        //    while (cellsWhichMoving.Count > 0)
-        //    {
-        //        List<Cell> cellsWhichEndMoving = new List<Cell>();
-
-        //        foreach (var cell in cellsWhichMoving)
-        //        {
-        //            if (!cell.IsMoving)
-        //            {
-        //                cellsWhichEndMoving.Add(cell);
-        //            }
-        //        }
-
-        //        foreach (var cell in cellsWhichEndMoving)
-        //        {
-        //            cellsWhichMoving.Remove(cell);
-        //        }
-
-        //        yield return new WaitForSeconds(0.1f);
-        //    }
-        //}
-
-        //OnMove?.Invoke();
-        //IsMovingProcess = false;
+        return invertedList;
     }
 }

@@ -79,7 +79,7 @@ public class Field : MonoBehaviour
     {
         foreach (var cell in _cells)
         {
-            if(!cell.IsEmpty)
+            if (!cell.IsEmpty)
                 cell.DeleteContent();
         }
     }
@@ -158,12 +158,15 @@ public class Field : MonoBehaviour
         List<Cell> emptyCells = new List<Cell>();
         foreach (var cell in _cells)
         {
-            if(cell.IsEmpty)
+            if (cell.IsEmpty)
                 emptyCells.Add(cell);
         }
 
-        int randomIndex = Random.Range(0, emptyCells.Count);
+        if (emptyCells.Count > 0)
+        {
+            int randomIndex = Random.Range(0, emptyCells.Count);
 
-        emptyCells[randomIndex].SetContent(_contentManager.GetContent(START_VALUE_CELL));
+            emptyCells[randomIndex].SetContent(_contentManager.GetContent(START_VALUE_CELL));
+        }
     }
 }
