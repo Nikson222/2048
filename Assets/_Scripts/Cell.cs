@@ -22,7 +22,8 @@ public class Cell : MonoBehaviour
     public bool IsMoving => _isMoving;
     public bool IsEmpty => Content == null;
 
-    public event Action<CellContent, int> OnMerge;
+    public event Action<CellContent, int> OnUpdatePoints;
+    public event Action OnMerge;
     public void Init(Cell rightCell, Cell downCell, Cell leftCell, Cell upperCell)
     {
         _rightCell = rightCell;
@@ -137,11 +138,12 @@ public class Cell : MonoBehaviour
         yield return StartCoroutine(MoveContentRoutine(content, cellToMerge, startPosition));
         cellToMerge.DoublePoints();
         DisableContent(content);
+        OnMerge?.Invoke();
     }
 
     public void DoublePoints()
     {
-        OnMerge?.Invoke(Content, Content.Value + 1);
+        OnUpdatePoints?.Invoke(Content, Content.Value + 1);
     }
 
     public bool IsCanMoveToDirection(SwipeDirection swipeDirection)

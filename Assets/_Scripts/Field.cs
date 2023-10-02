@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Zenject;
@@ -24,6 +25,8 @@ public class Field : MonoBehaviour
     public int FieldSize => FIELD_SIZE;
     public Cell[,] Cells => _cells;
 
+    public event Action OnRestartField;
+
     [Inject]
     public void Constructor(CellContentManager cellContentManager)
     {
@@ -45,7 +48,7 @@ public class Field : MonoBehaviour
 
     public void RestartField()
     {
-        ClearField();
+        restartField();
         FillStarterCells();
     }
 
@@ -75,25 +78,27 @@ public class Field : MonoBehaviour
         InitCells();
     }
 
-    private void ClearField()
+    private void restartField()
     {
         foreach (var cell in _cells)
         {
             if (!cell.IsEmpty)
                 cell.DeleteContent();
         }
+
+        OnRestartField?.Invoke();
     }
 
     private void FillStarterCells()
     {
-        int countCells = Random.Range(_minStarterCellsCount, _maxStarterCellsCount + 1);
+        int countCells = UnityEngine.Random.Range(_minStarterCellsCount, _maxStarterCellsCount + 1);
 
         Vector2Int lastCoordinates = Vector2Int.zero;
 
         for (int i = 0; i < countCells; i++)
         {
-            int xCoordinate = Random.Range(0, FIELD_SIZE);
-            int yCoordinate = Random.Range(0, FIELD_SIZE);
+            int xCoordinate = UnityEngine.Random.Range(0, FIELD_SIZE);
+            int yCoordinate = UnityEngine.Random.Range(0, FIELD_SIZE);
 
             if (new Vector2Int(xCoordinate, yCoordinate) != lastCoordinates)
             {
@@ -148,7 +153,7 @@ public class Field : MonoBehaviour
                 Cell upperCell = (y > 0) ? _cells[x, y - 1] : null;
 
                 currentCell.Init(rightCell, downCell, leftCell, upperCell);
-                currentCell.OnMerge += _contentManager.UpdateContent;
+                currentCell.OnUpdatePoints += _contentManager.UpdateContent;
             }
         }
     }
@@ -164,7 +169,7 @@ public class Field : MonoBehaviour
 
         if (emptyCells.Count > 0)
         {
-            int randomIndex = Random.Range(0, emptyCells.Count);
+            int randomIndex = UnityEngine.Random.Range(0, emptyCells.Count);
 
             emptyCells[randomIndex].SetContent(_contentManager.GetContent(START_VALUE_CELL));
         }
